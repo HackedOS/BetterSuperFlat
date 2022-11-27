@@ -12,7 +12,7 @@ In the `server.properties` change `level-type=minecraft\:normal` to `level-type=
 - Has all the biomes and structure bounding boxes of vanilla generation included
 
   #### Floor pattern in every dimension:
-  ![floor](screenshots/Floor.png?raw=true "Floor")
+  ![floor](screenshots/floor.png?raw=true "Floor")
 
 Inspired by / A Port of [pixeils/BetterSuperFlat](https://github.com/pixeils/BetterSuperFlat)
 
