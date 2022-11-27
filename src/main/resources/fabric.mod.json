@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bettersuperflat",
+  "version": "${version}",
+  "name": "Bettersuperflat",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/bettersuperflat/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xyz.hackos.bettersuperflat.Bettersuperflat"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.10",
+    "fabric": "*",
+    "minecraft": "1.19.2"
+  }
+}
