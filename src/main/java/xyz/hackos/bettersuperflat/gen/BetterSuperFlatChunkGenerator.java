@@ -1,72 +1,41 @@
 package xyz.hackos.bettersuperflat.gen;
 
-import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.structure.StructureSet;
-import net.minecraft.util.dynamic.RegistryOps;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
-import net.minecraft.util.math.random.ChunkRandom;
-import net.minecraft.util.math.random.RandomSeed;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.world.*;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.ChunkRegion;
+import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.Blender;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
-import net.minecraft.world.gen.feature.util.PlacedFeatureIndexer;
 import net.minecraft.world.gen.noise.NoiseConfig;
-import net.minecraft.world.gen.structure.Structure;
-import xyz.hackos.bettersuperflat.utils.BetterSuperFlatIdentifier;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class BetterSuperFlatChunkGenerator extends NoiseChunkGenerator {
-    private final Registry<DoublePerlinNoiseSampler.NoiseParameters> noiseRegistry;
-    private final Supplier<List<PlacedFeatureIndexer.IndexedFeatures>> indexedFeaturesListSupplier;
+    public static final Codec<BetterSuperFlatChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    BiomeSource.CODEC.fieldOf("biome_source").forGetter(BetterSuperFlatChunkGenerator::getBiomeSource),
+                    ChunkGeneratorSettings.REGISTRY_CODEC
+                            .fieldOf("settings")
+                            .forGetter(BetterSuperFlatChunkGenerator::getSettings))
+            .apply(instance, instance.stable(BetterSuperFlatChunkGenerator::new)));
 
-    public static final Codec<BetterSuperFlatChunkGenerator> CODEC =
-            RecordCodecBuilder.create(
-                    instance ->
-                            NoiseChunkGenerator.createStructureSetRegistryGetter(instance).and(
-                                            instance
-                                                    .group(
-                                                            RegistryOps.createRegistryCodec(Registry.NOISE_KEY).forGetter(generator -> generator.noiseRegistry),
-                                                            (BiomeSource.CODEC.fieldOf("biome_source")).forGetter(ChunkGenerator::getBiomeSource),
-                                                            (ChunkGeneratorSettings.REGISTRY_CODEC.fieldOf("settings")).forGetter(BetterSuperFlatChunkGenerator::getSettings)))
-                                    .apply(instance, instance.stable(BetterSuperFlatChunkGenerator::new)));
-
-    public BetterSuperFlatChunkGenerator(Registry<StructureSet> structureRegistry, Registry<DoublePerlinNoiseSampler.NoiseParameters> noiseRegistry, BiomeSource biomeSource, RegistryEntry<ChunkGeneratorSettings> settings) {
-        super(structureRegistry, noiseRegistry, biomeSource, settings);
-        this.noiseRegistry = noiseRegistry;
-        this.indexedFeaturesListSupplier = Suppliers.memoize(() -> PlacedFeatureIndexer.collectIndexedFeatures(List.copyOf(biomeSource.getBiomes()), biomeEntry -> biomeEntry.value().getGenerationSettings().getFeatures(), true));
-    }
-
-    public RegistryEntry<ChunkGeneratorSettings> getSettings() {
-        return this.settings;
+    public BetterSuperFlatChunkGenerator(BiomeSource biomeSource, RegistryEntry<ChunkGeneratorSettings> settings) {
+        super(biomeSource, settings);
     }
 
     @Override
@@ -165,10 +134,5 @@ public class BetterSuperFlatChunkGenerator extends NoiseChunkGenerator {
                 world, Blocks.GRAY_WOOL.getDefaultState(), pos, 1,0,15,14,0,15,box);
         fillRelativeBlockInBox(
                 world, Blocks.BARRIER.getDefaultState(), pos, 0,1,0,15,1,15,box);
-
-    }
-
-    static {
-        Registry.register(Registry.CHUNK_GENERATOR, new BetterSuperFlatIdentifier("bettersuperflat"), BetterSuperFlatChunkGenerator.CODEC);
     }
 }
