@@ -1,6 +1,8 @@
 package xyz.hackos.bettersuperflat.utils;
 
-public class BetterSuperFlatIdentifier extends net.minecraft.util.Identifier {
+import net.minecraft.util.Identifier;
+
+public class BetterSuperFlatIdentifier extends Identifier {
     public static final String NAMESPACE = "bettersuperflat";
 
     public BetterSuperFlatIdentifier(String path) {
